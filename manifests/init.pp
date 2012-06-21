@@ -1,52 +1,40 @@
-class virtuoso {
+class virtuoso(
+	$inipath = '/etc/virtuoso-opensource-6.1/', 
+	$dbpath = '/var/lib/virtuoso-opensource-6.1/',
+	$run = true ) {
 
-	### Packages required
-	package { "build-essential":
-		ensure => installed,
+	case $operatingsystem {
+		ubuntu: {
+			### Packages required
+			package { "build-essential": ensure => installed, }
+			package { "virtuoso-opensource": ensure => installed, }
+			package { "virtuoso-vad-isparql": ensure => installed, }
+			package { "virtuoso-vad-ods": ensure => installed, }
+			package { "virtuoso-vad-tutorial": ensure => installed, }
+		}
+		default: {
+			### Get, build and install from source code
+		}
 	}
 
-	package { "virtuoso-opensource":
-		ensure => installed,
-	}
+	file { "/etc/default/virtuoso-opensource-6.1":
+		owner => root,
+		group => root,
+		content => template("virtuoso/virtuoso-opensource.erb"),
+		notify => Service["virtuoso-opensource-6.1"],
+		require => $operatingsystem ? {
+			ubuntu => Package["virtuoso-opensource"],
+		}
+	} 
 
-	package { "virtuoso-vad-isparql":
-		ensure => installed,
-	}
-
-	package { "virtuoso-vad-ods":
-		ensure => installed,
-	}
-
-	package { "virtuoso-vad-tutorial":
-		ensure => installed,
-	}
-
-	## I really want augeas to work, resorting to sed.
-	# package { "rubygems":
-	# 	ensure => installed
-	# } ->
-	# package { "augeas-tools":
-	# 	ensure => installed,
-	# } ->
-	# package { "libaugeas-dev":
-	# 	ensure => installed,
-	# } ->
-	# package { "libaugeas-ruby":
-	# 	ensure => installed,
-	# }
-
-	# # In order to run we have to edit the default config
-	# augeas { "virtuoso-opensource-6.1":
-	# 	context => "/etc/default/virtuoso-opensource-6.1",
-	# 	changes => ["set RUN yes",],
-	# }
-
-	exec { "run=yes":
-		command => 'sed "s/RUN=no/RUN=yes/" /etc/default/virtuoso-opensource-6.1 > /tmp/tmp.txt && mv /tmp/tmp.txt /etc/default/virtuoso-opensource-6.1',
-		path => ["/usr/bin", "/bin"],
-		cwd => "/tmp",
-		require => Package["virtuoso-opensource"],
-		onlyif => 'grep RUN=yes /etc/default/virtuoso-opensource-6.1',
+	file { "${inipath}/virtuoso.ini":
+		owner => root,
+		group => root,
+		content => template("virtuoso/virtuoso.ini.erb"),
+		notify => Service["virtuoso-opensource-6.1"],
+		require => $operatingsystem ? {
+			ubuntu => Package["virtuoso-opensource"],
+		}
 	}
 
 	service { "virtuoso-opensource-6.1":
@@ -54,6 +42,5 @@ class virtuoso {
 		enable => true,
 		hasrestart => true,
 		hasstatus => true,
-		require => [Package["virtuoso-opensource"],Exec["run=yes"]],
 	}
 }

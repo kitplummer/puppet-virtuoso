@@ -11,9 +11,11 @@ class virtuoso(
 			package { "virtuoso-vad-isparql": ensure => installed, }
 			package { "virtuoso-vad-ods": ensure => installed, }
 			package { "virtuoso-vad-tutorial": ensure => installed, }
+			$servicename = "virtuoso-opensource-6.1"
 		}
 		default: {
-			### Get, build and install from source code
+			include virtuoso::source
+			$servicename = "virtuoso"
 		}
 	}
 
@@ -21,7 +23,9 @@ class virtuoso(
 		owner => root,
 		group => root,
 		content => template("virtuoso/virtuoso-opensource.erb"),
-		notify => Service["virtuoso-opensource-6.1"],
+		notify => $operatingsystem ? {
+			ubuntu => Service[$servicename],
+		}
 		require => $operatingsystem ? {
 			ubuntu => Package["virtuoso-opensource"],
 		}
@@ -31,13 +35,15 @@ class virtuoso(
 		owner => root,
 		group => root,
 		content => template("virtuoso/virtuoso.ini.erb"),
-		notify => Service["virtuoso-opensource-6.1"],
+		notify => $operatingsystem ? {
+			ubuntu => Service[$servicename],
+		}
 		require => $operatingsystem ? {
 			ubuntu => Package["virtuoso-opensource"],
 		}
 	}
 
-	service { "virtuoso-opensource-6.1":
+	service { $servicename:
 		ensure => running,
 		enable => true,
 		hasrestart => true,

@@ -1,54 +1,59 @@
 class virtuoso {
 
-	### Fetch the lastest tarball of Virtuoso code base
-	exec { "wget https://github.com/openlink/virtuoso-opensource/tarball/master -O virtuoso.tar":
-		cwd => "/tmp",
-		creates => "/tmp/virtuoso.tar",
-		path => ["/usr/bin", "/bin"]
-	} ->
-	exec { "tar xvf virtuoso.tar; mv openlink-virtuoso-opensource* virtuoso":
-		cwd => "/tmp",
-		creates => "/tmp/virtuoso",
-		path => ["/usr/bin", "/bin"]
-	} ->
-
 	### Packages required
 	package { "build-essential":
 		ensure => installed,
-	} -> 
+	}
 
-	package { "libssl-dev":
+	package { "virtuoso-opensource":
 		ensure => installed,
-	} ->
+	}
 
-	package { "autoconf":
+	package { "virtuoso-vad-isparql":
 		ensure => installed,
-	} ->
+	}
 
-	package { "automake":
+	package { "virtuoso-vad-ods":
 		ensure => installed,
-	} ->
+	}
 
-	package { "libtool":
+	package { "virtuoso-vad-tutorial":
 		ensure => installed,
-	} ->
+	}
 
-	package { "bison":
-		ensure => installed,
-	} ->
+	## I really want augeas to work, resorting to sed.
+	# package { "rubygems":
+	# 	ensure => installed
+	# } ->
+	# package { "augeas-tools":
+	# 	ensure => installed,
+	# } ->
+	# package { "libaugeas-dev":
+	# 	ensure => installed,
+	# } ->
+	# package { "libaugeas-ruby":
+	# 	ensure => installed,
+	# }
 
-	package { "flex":
-		ensure => installed,
-	} ->
+	# # In order to run we have to edit the default config
+	# augeas { "virtuoso-opensource-6.1":
+	# 	context => "/etc/default/virtuoso-opensource-6.1",
+	# 	changes => ["set RUN yes",],
+	# }
 
-	package { "gawk":
-		ensure => installed,
-	} ->
+	exec { "run=yes":
+		command => 'sed "s/RUN=no/RUN=yes/" /etc/default/virtuoso-opensource-6.1 > /tmp/tmp.txt && mv /tmp/tmp.txt /etc/default/virtuoso-opensource-6.1',
+		path => ["/usr/bin", "/bin"],
+		cwd => "/tmp",
+		require => Package["virtuoso-opensource"],
+		onlyif => 'grep RUN=yes /etc/default/virtuoso-opensource-6.1',
+	}
 
-	package { "gperf":
-		ensure => installed,
-	} ->
-
-	exec { "./autogen.sh"}
-
+	service { "virtuoso-opensource-6.1":
+		ensure => running,
+		enable => true,
+		hasrestart => true,
+		hasstatus => true,
+		require => [Package["virtuoso-opensource"],Exec["run=yes"]],
+	}
 }

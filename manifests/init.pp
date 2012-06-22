@@ -25,7 +25,7 @@ class virtuoso(
 		content => template("virtuoso/virtuoso-opensource.erb"),
 		notify => $operatingsystem ? {
 			ubuntu => Service[$servicename],
-		}
+		},
 		require => $operatingsystem ? {
 			ubuntu => Package["virtuoso-opensource"],
 		}
@@ -37,7 +37,7 @@ class virtuoso(
 		content => template("virtuoso/virtuoso.ini.erb"),
 		notify => $operatingsystem ? {
 			ubuntu => Service[$servicename],
-		}
+		},
 		require => $operatingsystem ? {
 			ubuntu => Package["virtuoso-opensource"],
 		}

@@ -1,0 +1,78 @@
+#!/bin/sh
+#
+# Example init.d script with LSB support.
+#
+# Please read this init.d carefully and modify the sections to
+# adjust it to the program you want to run.
+#
+# Copyright (c) 2007 Javier Fernandez-Sanguino <jfs@debian.org>
+#
+# This is free software; you may redistribute it and/or modify
+# it under the terms of the GNU General Public License as
+# published by the Free Software Foundation; either version 2,
+# or (at your option) any later version.
+#
+# This is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License with
+# the Debian operating system, in /usr/share/common-licenses/GPL;  if
+# not, write to the Free Software Foundation, Inc., 59 Temple Place,
+# Suite 330, Boston, MA 02111-1307 USA
+#
+### BEGIN INIT INFO
+# Provides:          virtuoso-opensource
+# Required-Start:    $network $local_fs $remote_fs
+# Required-Stop:     $remote_fs
+# Should-Start:      $named
+# Should-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Virtuoso OpenSource Edition
+# Description:       This file should be used to start/stop the virtuoso-t
+#                    daemon for the default installed database.
+### END INIT INFO
+
+#!/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+TOPDIR="/usr/local/virtuoso-opensource"
+DAEMON=$TOPDIR/bin/virtuoso-t
+CONFIG_DIR="/usr/local/virtuoso-opensource/var/lib/virtuoso/db/"
+ISQL_BIN=$TOPDIR/bin/isql
+# [path to virtuoso-t, starting from virtuoso.ini directory]
+EXEC_STRING="../../../../bin/virtuoso-t"
+PARAMETERS="+configfile /usr/local/virtuoso-opensource/var/lib/virtuoso/db/virtuoso.ini"
+
+NAME=virtuoso
+DESC="OpenLink Virtuoso Opensource"
+
+test -x $DAEMON || exit 0
+
+set -e
+
+case "$1" in
+start)
+echo -n "Starting $DESC: $NAME "
+# I cd to that directory so the logfiles are written there
+cd $CONFIG_DIR
+# PARAMETERS could be omitted
+sudo $EXEC_STRING $PARAMETERS
+echo "."
+;;
+stop)
+echo -n "Stopping $DESC: $NAME "
+sudo $ISQL_BIN localhost:1111 user password -K
+echo "."
+;;
+*)
+N=/etc/init.d/$NAME
+# echo "Usage: $N {start|stop|restart|reload|force-reload}" >&2
+echo "Usage: $N {start|stop|restart|force-reload}" >&2
+exit 1
+;;
+esac
+
+exit 0
+

@@ -21,11 +21,11 @@
 ;  Database setup
 ;
 [Database]
-DatabaseFile       = /var/lib/virtuoso-opensource-6.1/db/virtuoso.db
-ErrorLogFile       = /var/lib/virtuoso-opensource-6.1/db/virtuoso.log
-LockFile           = /var/lib/virtuoso-opensource-6.1/db/virtuoso.lck
-TransactionFile    = /var/lib/virtuoso-opensource-6.1/db/virtuoso.trx
-xa_persistent_file = /var/lib/virtuoso-opensource-6.1/db/virtuoso.pxa
+DatabaseFile       = <%= @dbpath %>/virtuoso.db
+ErrorLogFile       = <%= @dbpath %>/virtuoso.log
+LockFile           = <%= @dbpath %>/virtuoso.lck
+TransactionFile    = <%= @dbpath %>/virtuoso.trx
+xa_persistent_file = <%= @dbpath %>/virtuoso.pxa
 ErrorLogLevel      = 7
 FileExtend         = 200
 MaxCheckpointRemap = 2000
@@ -33,8 +33,8 @@ Striping           = 0
 TempStorage        = TempDatabase
 
 [TempDatabase]
-DatabaseFile       = /var/lib/virtuoso-opensource-6.1/db/virtuoso-temp.db
-TransactionFile    = /var/lib/virtuoso-opensource-6.1/db/virtuoso-temp.trx
+DatabaseFile       = <%= @dbpath %>/virtuoso-temp.db
+TransactionFile    = <%= @dbpath %>/virtuoso-temp.trx
 MaxCheckpointRemap = 2000
 Striping           = 0
 
@@ -62,20 +62,20 @@ MaxStaticCursorRows      = 5000
 CheckpointAuditTrail     = 0
 AllowOSCalls             = 0
 SchedulerInterval        = 10
-DirsAllowed              = ., /usr/share/virtuoso-opensource-6.1/vad
+DirsAllowed              = ., <%= @sharedir %>/vad
 ThreadCleanupInterval    = 0
 ThreadThreshold          = 10
 ResourcesCleanupInterval = 0
 FreeTextBatchSize        = 100000
 SingleCPU                = 0
-VADInstallDir            = /usr/share/virtuoso-opensource-6.1/vad/
+VADInstallDir            = <%= @sharedir %>/vad/
 PrefixResultNames        = 0
 RdfFreeTextRulesSize     = 100
 IndexTreeMaps            = 256
 
 [HTTPServer]
 ServerPort                  = 8890
-ServerRoot                  = /var/lib/virtuoso-opensource-6.1/vsp
+ServerRoot                  = <%= @topdir %>/var/lib/virtuoso-opensource<%= @version %>/vsp
 ServerThreads               = 20
 DavRoot                     = DAV
 EnabledDavVSP               = 0
@@ -189,7 +189,7 @@ DeferInferenceRulesInit    = 0	; controls inference rules loading
 ;PingService       		= http://rpc.pingthesemanticweb.com/
 
 [Plugins]
-LoadPath = /usr/lib/virtuoso-opensource-6.1/hosting
+LoadPath = <%= @hostingdir %>
 Load1    = plain, wikiv
 Load2    = plain, mediawiki
 Load3    = plain, creolewiki
